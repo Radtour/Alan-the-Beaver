@@ -1,5 +1,6 @@
 import discord
 import random
+import os
 from discord.ext import commands
 import asyncio
 
@@ -14,9 +15,9 @@ async def on_ready():
 async def test(ctx):
     await ctx.send('Test')
 
-@client.command()
-async def play(ctx, file_path):
-    await ctx.send("Folgende Audio-Datei wird abgespielt: " + file_path)
+#@client.command()
+#async def play(ctx, file_path):
+#    await ctx.send("Folgende Audio-Datei wird abgespielt: " + file_path)
 
 @client.command()
 async def vuvuzela(ctx):
@@ -41,6 +42,25 @@ async def vuvuzela(ctx):
     else:
         await client.say('User is not in a channel.')
 
+
+@client.command()
+async def join(ctx, *, channel: discord.VoiceChannel):
+    """Joins a voice channel"""
+
+    if ctx.voice_client is not None:
+        return await ctx.voice_client.move_to(channel)
+
+    await channel.connect()
+
+@client.command()
+async def play(ctx, *, query):
+    """Plays a file from the local filesystem"""
+
+    source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(query))
+    ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
+
+    await ctx.send('Now playing: {}'.format(query))
+
 @client.event
 async def on_message(message):
 
@@ -56,6 +76,5 @@ async def on_message(message):
         await message.channel.send("<:peepoClown:806233172564115467>")
 
     await client.process_commands(message)
-
 
 
