@@ -86,10 +86,6 @@ async def on_message(message):
             await message.delete()
         return
 
-
-    if chatMessage.startswith('$hello'):
-        await message.channel.send('Hello!')
-
     if chatMessage.__contains__(":peepoClown:"):
         await message.channel.send("<:peepoClown:806233172564115467>")
 
