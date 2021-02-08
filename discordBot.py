@@ -9,7 +9,9 @@ import asyncio
 #client = discord.Client()
 client = commands.Bot(command_prefix="!")
 
-whitelist_labels = ["<:peepoClown:806233172564115467>"]
+emoji_list = ["<:peepoClown:806233172564115467>"]
+
+whitelist_labels = emoji_list + ["test"]
 
 @client.event
 async def on_ready():
