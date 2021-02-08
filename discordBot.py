@@ -6,48 +6,25 @@ import os
 from discord.ext import commands
 import asyncio
 
-#client = discord.Client()
 client = commands.Bot(command_prefix="!")
+
 
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
 
+
 @client.command()
 async def test(ctx):
     await ctx.send('Test')
 
-#@client.command()
-#async def play(ctx, file_path):
-#    await ctx.send("Folgende Audio-Datei wird abgespielt: " + file_path)
 
 @client.command()
-async def vuvuzela(ctx):
-    # grab the user who sent the command
-    user = ctx.message.author
-    voice_channel = user.voice.voice_channel
-    channel = None
-    # only play music if user is in a voice channel
-    if voice_channel != None:
-        # grab user's voice channel
-        channel = voice_channel.name
-        await client.say('User is in channel: ' + channel)
-        # create StreamPlayer
-        vc = await client.join_voice_channel(voice_channel)
-        player = vc.create_ffmpeg_player('SPEICHER.mp3', after=lambda: print('done'))
-        player.start()
-        while not player.is_done():
-            await asyncio.sleep(1)
-        # disconnect after the player has finished
-        player.stop()
-        await vc.disconnect()
-    else:
-        await client.say('User is not in a channel.')
-
-
-@client.command()
-async def join(ctx, *, channel: discord.VoiceChannel):
+async def join(ctx, *, channel: discord.VoiceChannel = None):
     """Joins a voice channel"""
+
+    if channel is None:
+        channel = ctx.author.voice.channel
 
     if ctx.voice_client is not None:
         return await ctx.voice_client.move_to(channel)
@@ -56,14 +33,21 @@ async def join(ctx, *, channel: discord.VoiceChannel):
 
 @client.command()
 async def play(ctx, *, query):
+
     """Plays a file from the local filesystem"""
+    if not query.__contains__(".mp3"):
+        query = query + ".mp3"
 
-    #TODO: Testen ob die .mp3 file auch wirklich existiert
+    path = os.environ.get('Discord_Bot_Soundfiles')
+    print(path + query)
+    if os.path.isfile(path + query):
 
-    source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(os.environ.get('Discord_Bot_Soundfiles') + "\\" + query + ".mp3"))
-    ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
+        source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(os.environ.get('Discord_Bot_Soundfiles') + query))
+        ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
+        await ctx.send('Now playing: {}'.format(query))
 
-    await ctx.send('Now playing: {}'.format(query))
+    else:
+        await ctx.send("Soundfile not found !")
 
 
 @client.command()
@@ -71,6 +55,15 @@ async def bigmac(ctx, *, member: discord.Member):
     await play(ctx=ctx, query="BIGMAC")
     time.sleep(1.5)
     await member.move_to(None)
+
+
+@client.command()
+async def soundlist(ctx):
+
+    pathfinder = os.listdir(os.environ.get('Discord_Bot_Soundfiles'))
+    for i in range(len(pathfinder)):
+        await ctx.send(pathfinder[i])
+
 
 @client.event
 async def on_message(message):
@@ -87,5 +80,6 @@ async def on_message(message):
         await message.channel.send("<:peepoClown:806233172564115467>")
 
     await client.process_commands(message)
+
 
 
