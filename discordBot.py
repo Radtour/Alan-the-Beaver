@@ -17,6 +17,9 @@ whitelist_labels = emoji_list + ["test"]
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
 
+    activity = discord.Activity(name="hunting with a cleaver", type=discord.ActivityType.playing)
+    await client.change_presence(status=discord.Status.online, activity=activity)
+
 
 @client.command()
 async def test(ctx):
