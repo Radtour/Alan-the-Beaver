@@ -1,3 +1,5 @@
+import time
+
 import discord
 import random
 import os
@@ -56,10 +58,19 @@ async def join(ctx, *, channel: discord.VoiceChannel):
 async def play(ctx, *, query):
     """Plays a file from the local filesystem"""
 
-    source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(os.environ.get('Discord_Bot_Soundfiles') + "\\" + query))
+    #TODO: Testen ob die .mp3 file auch wirklich existiert
+
+    source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(os.environ.get('Discord_Bot_Soundfiles') + "\\" + query + ".mp3"))
     ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
 
     await ctx.send('Now playing: {}'.format(query))
+
+
+@client.command()
+async def bigmac(ctx, *, member: discord.Member):
+    await play(ctx=ctx, query="BIGMAC")
+    time.sleep(1.5)
+    await member.move_to(None)
 
 @client.event
 async def on_message(message):
