@@ -9,6 +9,7 @@ import asyncio
 #client = discord.Client()
 client = commands.Bot(command_prefix="!")
 
+whitelist_labels = ["<:peepoClown:806233172564115467>"]
 
 @client.event
 async def on_ready():
@@ -60,7 +61,7 @@ async def bigmac(ctx, *, member: discord.Member):
 
 @client.command()
 async def soundlist(ctx):
-    list = ""
+    list = "<:peepoClown:806233172564115467> SOUND-FILES <:peepoClown:806233172564115467>\n\n"
     pathfinder = os.listdir(os.environ.get('Discord_Bot_Soundfiles'))
     for i in range(len(pathfinder)):
         location = pathfinder[i].find(".mp3")
@@ -72,14 +73,21 @@ async def soundlist(ctx):
 @client.event
 async def on_message(message):
 
-    if message.author == client.user:
-        time.sleep(1.5)
-        await message.delete()
-        return
-
     chatMessage = message.content
 
-    if message.content.startswith('$hello'):
+    if message.author == client.user:
+
+        is_in_message = False
+        for whitelist_label in whitelist_labels:
+            if chatMessage.__contains__(whitelist_label):
+                is_in_message = True
+        if not is_in_message:
+            time.sleep(1.5)
+            await message.delete()
+        return
+
+
+    if chatMessage.startswith('$hello'):
         await message.channel.send('Hello!')
 
     if chatMessage.__contains__(":peepoClown:"):
