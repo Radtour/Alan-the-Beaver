@@ -6,6 +6,7 @@ import os
 from discord.ext import commands
 import asyncio
 
+#client = discord.Client()
 client = commands.Bot(command_prefix="!")
 
 
@@ -69,6 +70,8 @@ async def soundlist(ctx):
 async def on_message(message):
 
     if message.author == client.user:
+        time.sleep(1.5)
+        await message.delete()
         return
 
     chatMessage = message.content
@@ -80,6 +83,12 @@ async def on_message(message):
         await message.channel.send("<:peepoClown:806233172564115467>")
 
     await client.process_commands(message)
+
+    if(message.content.startswith('!')):
+        time.sleep(1.5)
+        await message.delete()
+
+
 
 
 
