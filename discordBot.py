@@ -60,10 +60,13 @@ async def bigmac(ctx, *, member: discord.Member):
 
 @client.command()
 async def soundlist(ctx):
-
+    list = ""
     pathfinder = os.listdir(os.environ.get('Discord_Bot_Soundfiles'))
     for i in range(len(pathfinder)):
-        await ctx.send(pathfinder[i])
+        location = pathfinder[i].find(".mp3")
+        list += pathfinder[i][:location] + "\n"
+    await ctx.send(list)
+
 
 
 @client.event
