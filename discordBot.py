@@ -105,6 +105,9 @@ async def on_message(message):
         if not is_in_message:
             time.sleep(1.5)
             await message.delete()
+        else:
+            time.sleep(30)
+            await message.delete()
         return
 
     if chatMessage.__contains__(":peepoClown:"):
