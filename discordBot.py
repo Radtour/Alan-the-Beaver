@@ -43,6 +43,8 @@ async def join(ctx, *, channel: discord.VoiceChannel = None):
 @client.command()
 async def play(ctx, *, query):
     """Plays a file from the local filesystem"""
+    await join(ctx=ctx, channel=None)
+
     if not query.__contains__(".mp3"):
         query = query + ".mp3"
 
