@@ -7,7 +7,7 @@ from discord.ext import commands
 import asyncio
 
 #client = discord.Client()
-client = commands.Bot(command_prefix="!")
+client = commands.Bot(command_prefix="!", help_command=None)
 
 emoji_list = ["<:peepoClown:806233172564115467>"]
 
@@ -58,7 +58,7 @@ async def play(ctx, *, query):
         await ctx.send("Soundfile not found !")
 
 
-@client.command()
+@client.command(aliases=['BIGMAC'])
 async def bigmac(ctx, *, member: discord.Member):
     await play(ctx=ctx, query="BIGMAC")
     time.sleep(1.)
@@ -73,6 +73,17 @@ async def soundlist(ctx):
         location = pathfinder[i].find(".mp3")
         list += pathfinder[i][:location] + "\n"
     await ctx.send(list)
+
+
+@client.command()
+async def help(ctx):
+    await ctx.send("<:peepoClown:806233172564115467> COMMANDS <:peepoClown:806233172564115467>\n\n"+
+          "!soundlist\n"+
+          "!join\n"+
+          "!join CHANNELNAME\n"+
+          "!quit\n"+
+          "!bigmac USERNAME\n"+
+          "!help")
 
 
 @client.event
