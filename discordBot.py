@@ -13,6 +13,7 @@ emoji_list = ["<:peepoClown:806233172564115467>"]
 
 whitelist_labels = emoji_list + ["test"]
 
+
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
@@ -38,9 +39,9 @@ async def join(ctx, *, channel: discord.VoiceChannel = None):
 
     await channel.connect()
 
+
 @client.command()
 async def play(ctx, *, query):
-
     """Plays a file from the local filesystem"""
     if not query.__contains__(".mp3"):
         query = query + ".mp3"
@@ -60,7 +61,7 @@ async def play(ctx, *, query):
 @client.command()
 async def bigmac(ctx, *, member: discord.Member):
     await play(ctx=ctx, query="BIGMAC")
-    time.sleep(1.5)
+    time.sleep(1.)
     await member.move_to(None)
 
 
@@ -74,9 +75,11 @@ async def soundlist(ctx):
     await ctx.send(list)
 
 
-
 @client.event
 async def on_message(message):
+
+    print(message.author)
+    print(message.content)
 
     chatMessage = message.content
 
