@@ -13,7 +13,7 @@ client = commands.Bot(command_prefix="!", help_command=None, intents=intents)
 
 emoji_list = ["<:peepoClown:806233172564115467>"]
 
-whitelist_labels = emoji_list + ["test"]
+whitelist_labels = emoji_list + ["Existing categories"]
 
 
 @client.event
@@ -69,10 +69,25 @@ async def bigmac(ctx, *, member: discord.Member):
     await member.move_to(None)
 
 
-@client.command()
-async def soundlist(ctx):
+@client.command(aliases=['soundfile'])
+async def soundlist(ctx, query):
     list = "<:peepoClown:806233172564115467> SOUND-FILES <:peepoClown:806233172564115467>\n\n"
-    pathfinder = os.listdir(os.environ.get('Discord_Bot_Soundfiles'))
+    if query.__contains__("meme"):
+        query = "meme"
+    elif query.__contains__("saufi"):
+        query = "saufi"
+    elif query.__contains__("sounds"):
+        query = "sounds"
+    else:
+        existing_categories = ""
+        pathfinder = os.listdir(os.environ.get('Discord_Bot_Soundfiles'))
+        for i in range(len(pathfinder)):
+            if not pathfinder[i].__contains__(".mp3"):
+                existing_categories += pathfinder[i] + "\n"
+        await ctx.send("Error: category not found.\n\nExisting categories:\n" + existing_categories)
+        return
+
+    pathfinder = os.listdir(os.environ.get('Discord_Bot_Soundfiles') + query)
     for i in range(len(pathfinder)):
         location = pathfinder[i].find(".mp3")
         list += pathfinder[i][:location] + "\n"
@@ -92,12 +107,12 @@ async def help(ctx):
 
 @client.event
 async def on_voice_state_update(member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
-    print("test")
+   # print("test")
     if before.channel is None and after.channel is not None:
         onlyFans = "OnlyFans"
         role = discord.utils.get(member.guild.roles, name= onlyFans)
         if role in member.roles:
-            print("test2")
+            #print("test2")
 
             try:
                 if not (client in member.voice.channel.members):
@@ -107,6 +122,7 @@ async def on_voice_state_update(member: discord.Member, before: discord.VoiceSta
 
             channel = discord.utils.get(client.voice_clients, channel=after.channel)
             source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(os.environ.get('Discord_Bot_Soundfiles') + "intro.mp3"))
+            time.sleep(0.3)
             channel.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
 
 
