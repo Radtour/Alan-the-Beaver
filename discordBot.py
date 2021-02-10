@@ -7,7 +7,9 @@ from discord.ext import commands
 import asyncio
 
 #client = discord.Client()
-client = commands.Bot(command_prefix="!", help_command=None)
+intents = discord.Intents.default()
+intents.voice_states = True
+client = commands.Bot(command_prefix="!", help_command=None, intents=intents)
 
 emoji_list = ["<:peepoClown:806233172564115467>"]
 
@@ -89,6 +91,26 @@ async def help(ctx):
 
 
 @client.event
+async def on_voice_state_update(member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
+    print("test")
+    if before.channel is None and after.channel is not None:
+        onlyFans = "OnlyFans"
+        role = discord.utils.get(member.guild.roles, name= onlyFans)
+        if role in member.roles:
+            print("test2")
+
+            try:
+                if not (client in member.voice.channel.members):
+                    await member.voice.channel.connect()
+            except:
+                pass
+
+            channel = discord.utils.get(client.voice_clients, channel=after.channel)
+            source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(os.environ.get('Discord_Bot_Soundfiles') + "intro.mp3"))
+            channel.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
+
+
+@client.event
 async def on_message(message):
 
     print(message.author)
@@ -104,9 +126,6 @@ async def on_message(message):
                 is_in_message = True
         if not is_in_message:
             time.sleep(1.5)
-            await message.delete()
-        else:
-            time.sleep(30)
             await message.delete()
         return
 
