@@ -3,14 +3,14 @@ import discord
 import os
 from discord.ext import commands
 
-#client = discord.Client()
+
 intents = discord.Intents.default()
 intents.voice_states = True
 client = commands.Bot(command_prefix="!", help_command=None, intents=intents)
 
 emoji_list = ["<:peepoClown:806233172564115467>"]
 
-whitelist_labels = emoji_list + ["Existing categories"]
+whitelist_labels = emoji_list + ["Existing categories", "Categories"]
 
 
 @client.event
@@ -47,11 +47,11 @@ async def play(ctx, *, query):
     if not query.__contains__(".mp3"):
         query = query + ".mp3"
 
-    path = os.environ.get('Discord_Bot_Soundfiles')
-    print(path + query)
+    path = find_audio_file(query)
+    print(str(path) + str(query))
     if os.path.isfile(path + query):
 
-        source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(os.environ.get('Discord_Bot_Soundfiles') + query))
+        source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(path + query))
         ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
         await ctx.send('Now playing: {}'.format(query))
 
@@ -62,39 +62,50 @@ async def play(ctx, *, query):
 @client.command(aliases=['BIGMAC'])
 async def bigmac(ctx, *, member: discord.Member):
     await play(ctx=ctx, query="BIGMAC")
-    time.sleep(1.)
+    await asyncio.sleep(1.)
     await member.move_to(None)
 
 
-@client.command(aliases=['soundfile'])
-async def soundlist(ctx, query):
+@client.command(aliases=['soundfile', 'soundfiles'])
+async def soundlist(ctx, query=None):
     list = "<:peepoClown:806233172564115467> SOUND-FILES <:peepoClown:806233172564115467>\n\n"
-    if query.__contains__("meme"):
-        query = "meme"
-    elif query.__contains__("saufi"):
-        query = "saufi"
-    elif query.__contains__("sounds"):
-        query = "sounds"
+
+    if query is not None:
+
+        if query.__contains__("meme"):
+            query = "meme"
+        elif query.__contains__("saufi"):
+            query = "saufi"
+        elif query.__contains__("sounds"):
+            query = "sounds"
+        else:
+            existing_categories = ""
+            pathfinder = os.listdir(os.environ.get('Discord_Bot_Soundfiles'))
+            for i in range(len(pathfinder)):
+                if not pathfinder[i].__contains__(".mp3"):
+                    existing_categories += pathfinder[i] + "\n"
+            await ctx.send("Error: category not found.\n\nExisting categories:\n" + existing_categories)
+            return
+
+        pathfinder = os.listdir(os.environ.get('Discord_Bot_Soundfiles') + query)
+        for i in range(len(pathfinder)):
+            location = pathfinder[i].find(".mp3")
+            list += pathfinder[i][:location] + "\n"
+        await ctx.send(list)
     else:
         existing_categories = ""
         pathfinder = os.listdir(os.environ.get('Discord_Bot_Soundfiles'))
         for i in range(len(pathfinder)):
             if not pathfinder[i].__contains__(".mp3"):
                 existing_categories += pathfinder[i] + "\n"
-        await ctx.send("Error: category not found.\n\nExisting categories:\n" + existing_categories)
-        return
-
-    pathfinder = os.listdir(os.environ.get('Discord_Bot_Soundfiles') + query)
-    for i in range(len(pathfinder)):
-        location = pathfinder[i].find(".mp3")
-        list += pathfinder[i][:location] + "\n"
-    await ctx.send(list)
+        await ctx.send(f"\n Categories: \n{existing_categories}")
 
 
 @client.command()
 async def help(ctx):
     await ctx.send("<:peepoClown:806233172564115467> COMMANDS <:peepoClown:806233172564115467>\n\n"+
           "!soundlist\n"+
+          "!soundlist KATEGORIE\n"
           "!join\n"+
           "!join CHANNELNAME\n"+
           "!quit\n"+
@@ -118,7 +129,8 @@ async def on_voice_state_update(member: discord.Member, before: discord.VoiceSta
                 pass
 
             channel = discord.utils.get(client.voice_clients, channel=after.channel)
-            source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(os.environ.get('Discord_Bot_Soundfiles') + "intro.mp3"))
+            path = find_audio_file("intro.mp3")
+            source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(path + "intro.mp3"))
             await asyncio.sleep(0.3)
             channel.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
 
@@ -140,7 +152,7 @@ async def on_message(message):
         if not is_in_message:
             await remove_message(message, 1.5)
         else:
-            await remove_message(message, 5)
+            await remove_message(message, 30)
         return
 
     if chatMessage.__contains__(":peepoClown:"):
@@ -149,12 +161,19 @@ async def on_message(message):
     await client.process_commands(message)
 
     if message.content.startswith('!'):
-        await remove_message(message,  1.5)
+        await remove_message(message,  0.5)
 
 
 async def remove_message(message, wait_duration):
     await asyncio.sleep(wait_duration)
     await message.delete()
+
+
+def find_audio_file(sound_id):
+    for root, dirs, files in os.walk(os.environ.get('Discord_Bot_Soundfiles'), topdown=True):
+        for file in files:
+            if file.casefold() == sound_id.casefold():
+                return root + "\\"
 
 
 
