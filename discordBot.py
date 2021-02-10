@@ -1,10 +1,7 @@
-import time
-
+import asyncio
 import discord
-import random
 import os
 from discord.ext import commands
-import asyncio
 
 #client = discord.Client()
 intents = discord.Intents.default()
@@ -122,7 +119,7 @@ async def on_voice_state_update(member: discord.Member, before: discord.VoiceSta
 
             channel = discord.utils.get(client.voice_clients, channel=after.channel)
             source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(os.environ.get('Discord_Bot_Soundfiles') + "intro.mp3"))
-            time.sleep(0.3)
+            await asyncio.sleep(0.3)
             channel.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
 
 
@@ -141,8 +138,9 @@ async def on_message(message):
             if chatMessage.__contains__(whitelist_label):
                 is_in_message = True
         if not is_in_message:
-            time.sleep(1.5)
-            await message.delete()
+            await remove_message(message, 1.5)
+        else:
+            await remove_message(message, 5)
         return
 
     if chatMessage.__contains__(":peepoClown:"):
@@ -150,11 +148,13 @@ async def on_message(message):
 
     await client.process_commands(message)
 
-    if(message.content.startswith('!')):
-        time.sleep(1.5)
-        await message.delete()
+    if message.content.startswith('!'):
+        await remove_message(message,  1.5)
 
 
+async def remove_message(message, wait_duration):
+    await asyncio.sleep(wait_duration)
+    await message.delete()
 
 
 
