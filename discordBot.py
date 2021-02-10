@@ -65,6 +65,11 @@ async def bigmac(ctx, *, member: discord.Member):
     await asyncio.sleep(1.)
     await member.move_to(None)
 
+@client.command()
+async def manetti(ctx: discord.ext.commands.Context):
+    await play(ctx=ctx, query="manetti")
+    await asyncio.sleep(1.)
+    await ctx.author.move_to(None)
 
 @client.command(aliases=['soundfile', 'soundfiles'])
 async def soundlist(ctx, query=None):
