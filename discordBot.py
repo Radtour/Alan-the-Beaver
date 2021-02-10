@@ -48,7 +48,7 @@ async def play(ctx, *, query):
         query = query + ".mp3"
 
     path = find_audio_file(query)
-    print(str(path) + str(query))
+    #print(str(path) + str(query))
     if os.path.isfile(path + query):
 
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(path + query))
@@ -138,8 +138,8 @@ async def on_voice_state_update(member: discord.Member, before: discord.VoiceSta
 @client.event
 async def on_message(message):
 
-    print(message.author)
-    print(message.content)
+    #print(message.author)
+    #print(message.content)
 
     chatMessage = message.content
 
