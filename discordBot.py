@@ -1,8 +1,9 @@
 import asyncio
 import discord
 import os
+import random
 from discord.ext import commands
-
+from mutagen.mp3 import MP3
 
 intents = discord.Intents.default()
 intents.voice_states = True
@@ -65,9 +66,8 @@ async def bigmac(ctx, *, member: discord.Member):
     await asyncio.sleep(1.)
     await member.move_to(None)
 
-@client.command()
-async def manetti(ctx: discord.ext.commands.Context):
-    await play(ctx=ctx, query="manetti")
+
+async def raus(ctx: discord.ext.commands.Context):
     await asyncio.sleep(1.)
     await ctx.author.move_to(None)
 
@@ -87,7 +87,7 @@ async def soundlist(ctx, query=None):
             existing_categories = ""
             pathfinder = os.listdir(os.environ.get('Discord_Bot_Soundfiles'))
             for i in range(len(pathfinder)):
-                if not pathfinder[i].__contains__(".mp3"):
+                if not pathfinder[i].__contains__(".mp3") and not pathfinder[i] == "!bye":
                     existing_categories += pathfinder[i] + "\n"
             await ctx.send("Error: category not found.\n\nExisting categories:\n" + existing_categories)
             return
@@ -101,10 +101,9 @@ async def soundlist(ctx, query=None):
         existing_categories = ""
         pathfinder = os.listdir(os.environ.get('Discord_Bot_Soundfiles'))
         for i in range(len(pathfinder)):
-            if not pathfinder[i].__contains__(".mp3"):
+            if not pathfinder[i].__contains__(".mp3") and not pathfinder[i] == "!bye":
                 existing_categories += pathfinder[i] + "\n"
         await ctx.send(f"\n Categories: \n{existing_categories}")
-
 
 @client.command()
 async def help(ctx):
@@ -116,6 +115,20 @@ async def help(ctx):
           "!quit\n"+
           "!bigmac USERNAME\n"+
           "!help")
+
+
+@client.command()
+async def bye(ctx: discord.ext.commands.Context):
+    pathfinder = os.listdir(os.environ.get('Discord_Bot_Soundfiles') + "!bye/")
+    amount = len(pathfinder)
+    sound_nr = random.randint(0, amount-1)
+    audio = MP3(os.environ.get('Discord_Bot_Soundfiles') + "!bye/" + pathfinder[sound_nr])
+    length = audio.info.length
+    #await ctx.send(length)
+    await play(ctx=ctx, query=pathfinder[sound_nr])
+    await asyncio.sleep(length-1.5)
+    await raus(ctx=ctx)
+
 
 
 @client.event
@@ -179,6 +192,4 @@ def find_audio_file(sound_id):
         for file in files:
             if file.casefold() == sound_id.casefold():
                 return root + "\\"
-
-
 
