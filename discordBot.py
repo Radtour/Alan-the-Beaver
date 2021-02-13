@@ -2,7 +2,10 @@ import asyncio
 import discord
 import os
 import youtube_dl
+import random
 from discord.ext import commands
+from mutagen.mp3 import MP3
+
 
 intents = discord.Intents.default()
 intents.voice_states = True
@@ -40,14 +43,6 @@ async def on_ready():
     activity = discord.Activity(name="hunting with a cleaver", type=discord.ActivityType.playing)
     await client.change_presence(status=discord.Status.online, activity=activity)
 
-    guilds = client.guilds
-
-    for guild in guilds:
-        channels = guild.channels
-        alans_channel = discord.utils.get(channels, name='alan-the-beaver')
-        if alans_channel is None:
-            await guild.create_text_channel('alan-the-beaver')
-
 
 @client.command()
 async def test(ctx):
@@ -76,7 +71,7 @@ async def play(ctx, *, query):
         query = query + ".mp3"
 
     path = find_audio_file(query)
-    # print(str(path) + str(query))
+    #print(str(path) + str(query))
     if os.path.isfile(path + query):
 
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(path + query))
@@ -99,9 +94,7 @@ async def bigmac(ctx, *, member: discord.Member):
     await member.move_to(None)
 
 
-@client.command()
-async def manetti(ctx: discord.ext.commands.Context):
-    await play(ctx=ctx, query="manetti")
+async def raus(ctx: discord.ext.commands.Context):
     await asyncio.sleep(1.)
     await ctx.author.move_to(None)
 
@@ -122,7 +115,7 @@ async def soundlist(ctx, query=None):
             existing_categories = ""
             pathfinder = os.listdir(os.environ.get('Discord_Bot_Soundfiles'))
             for i in range(len(pathfinder)):
-                if not pathfinder[i].__contains__(".mp3"):
+                if not pathfinder[i].__contains__(".mp3") and not pathfinder[i] == "!bye":
                     existing_categories += pathfinder[i] + "\n"
             await ctx.send("Error: category not found.\n\nExisting categories:\n" + existing_categories)
             return
@@ -136,7 +129,7 @@ async def soundlist(ctx, query=None):
         existing_categories = ""
         pathfinder = os.listdir(os.environ.get('Discord_Bot_Soundfiles'))
         for i in range(len(pathfinder)):
-            if not pathfinder[i].__contains__(".mp3"):
+            if not pathfinder[i].__contains__(".mp3") and not pathfinder[i] == "!bye":
                 existing_categories += pathfinder[i] + "\n"
         await ctx.send(f"\n Categories: \n{existing_categories}")
 
@@ -153,8 +146,23 @@ async def help(ctx):
                    "!help")
 
 
+@client.command()
+async def bye(ctx: discord.ext.commands.Context):
+    pathfinder = os.listdir(os.environ.get('Discord_Bot_Soundfiles') + "!bye/")
+    amount = len(pathfinder)
+    sound_nr = random.randint(0, amount-1)
+    audio = MP3(os.environ.get('Discord_Bot_Soundfiles') + "!bye/" + pathfinder[sound_nr])
+    length = audio.info.length
+    #await ctx.send(length)
+    await play(ctx=ctx, query=pathfinder[sound_nr])
+    await asyncio.sleep(length-1.5)
+    await raus(ctx=ctx)
+
+
+
 @client.event
 async def on_voice_state_update(member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
+   # print("test")
     if before.channel is None and after.channel is not None:
         onlyFans = discord.utils.get(member.guild.roles, name="OnlyFans")
         if onlyFans in member.roles:
@@ -242,7 +250,7 @@ async def on_message(message):
     await client.process_commands(message)
 
     if message.content.startswith('!'):
-        await remove_message(message, 0.5)
+        await remove_message(message,  0.5)
 
 
 async def remove_message(message, wait_duration):
@@ -255,3 +263,4 @@ def find_audio_file(sound_id):
         for file in files:
             if file.casefold() == sound_id.casefold():
                 return root + "\\"
+
