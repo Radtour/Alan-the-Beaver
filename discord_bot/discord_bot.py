@@ -1,10 +1,9 @@
 import asyncio
 import discord
 import os
-import youtube_dl
-import random
 from discord.ext import commands
-from mutagen.mp3 import MP3
+
+from discord_bot.Audio import find_audio_file
 
 intents = discord.Intents.default()
 intents.voice_states = True
@@ -13,26 +12,6 @@ client = commands.Bot(command_prefix="!", help_command=None, intents=intents)
 emoji_list = ["<:peepoClown:806233172564115467>"]
 
 temporary_whitelist_labels = emoji_list + ["Existing categories", "Categories"]
-
-ffmpeg_options = {
-    'options': '-vn'
-}
-
-ytdl_format_options = {
-    'format': 'bestaudio/best',
-    'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
-    'restrictfilenames': True,
-    'noplaylist': True,
-    'nocheckcertificate': True,
-    'ignoreerrors': False,
-    'logtostderr': False,
-    'quiet': True,
-    'no_warnings': True,
-    'default_search': 'auto',
-    'source_address': '0.0.0.0'  # bind to ipv4 since ipv6 addresses cause issues sometimes
-}
-
-ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
 
 @client.event
@@ -46,56 +25,6 @@ async def on_ready():
 @client.command()
 async def test(ctx):
     await ctx.send('Test')
-
-
-@client.command()
-async def join(ctx, *, channel: discord.VoiceChannel = None):
-    """Joins a voice channel"""
-
-    if channel is None:
-        channel = ctx.author.voice.channel
-
-    if ctx.voice_client is not None:
-        return await ctx.voice_client.move_to(channel)
-
-    await channel.connect()
-
-
-@client.command()
-async def play(ctx, *, query):
-    """Plays a file from the local filesystem"""
-    await join(ctx=ctx, channel=None)
-
-    if not query.__contains__(".mp3"):
-        query = query + ".mp3"
-
-    path = find_audio_file(query)
-    # print(str(path) + str(query))
-    if os.path.isfile(path + query):
-
-        source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(path + query))
-        ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
-        await ctx.send('Now playing: {}'.format(query))
-
-    else:
-        await ctx.send("Soundfile not found !")
-
-
-@client.command(aliases=['maul', 'fresse', 'schnauze', 'halt'])
-async def stop(ctx):
-    ctx.voice_client.stop()
-
-
-@client.command(aliases=['raus'])
-async def quit(ctx):
-    await ctx.voice_client.disconnect()
-
-
-@client.command(aliases=['BIGMAC'])
-async def bigmac(ctx, *, member: discord.Member):
-    await play(ctx=ctx, query="BIGMAC")
-    await asyncio.sleep(1.)
-    await member.move_to(None)
 
 
 @client.command(aliases=['soundfile', 'soundfiles'])
@@ -133,7 +62,6 @@ async def soundlist(ctx, query=None):
         await ctx.send(f"\n Categories: \n{existing_categories}")
 
 
-
 @client.command()
 async def help(ctx):
     await ctx.send("<:peepoClown:806233172564115467> COMMANDS <:peepoClown:806233172564115467>\n\n" +
@@ -144,24 +72,6 @@ async def help(ctx):
                    "!quit\n" +
                    "!bigmac USERNAME\n" +
                    "!help")
-
-
-@client.command()
-async def bye(ctx: discord.ext.commands.Context):
-    pathfinder = os.listdir(os.environ.get('Discord_Bot_Soundfiles') + "!bye/")
-    amount = len(pathfinder)
-    sound_nr = random.randint(0, amount - 1)
-    audio = MP3(os.environ.get('Discord_Bot_Soundfiles') + "!bye/" + pathfinder[sound_nr])
-    length = audio.info.length
-    # await ctx.send(length)
-    await play(ctx=ctx, query=pathfinder[sound_nr])
-    await asyncio.sleep(length - 1.5)
-    await raus(ctx=ctx)
-
-
-async def raus(ctx: discord.ext.commands.Context):
-    await asyncio.sleep(1.)
-    await ctx.author.move_to(None)
 
 
 @client.event
@@ -197,38 +107,6 @@ async def on_voice_state_update(member: discord.Member, before: discord.VoiceSta
             channel.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
 
 
-@client.command()
-async def yt(ctx, *, url):
-    await join(ctx=ctx)
-    async with ctx.typing():
-        await join(ctx=ctx)
-        player = await YTDLSource.from_url(url, loop=client.loop, stream=True)
-        ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
-    await ctx.send('Now playing: {}'.format(player.title))
-
-
-class YTDLSource(discord.PCMVolumeTransformer):
-    def __init__(self, source, *, data, volume=0.5):
-        super().__init__(source, volume)
-
-        self.data = data
-
-        self.title = data.get('title')
-        self.url = data.get('url')
-
-    @classmethod
-    async def from_url(cls, url, *, loop=None, stream=False):
-        loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
-
-        if 'entries' in data:
-            # take first item from a playlist
-            data = data['entries'][0]
-
-        filename = data['url'] if stream else ytdl.prepare_filename(data)
-        return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
-
-
 @client.event
 async def on_message(message):
     chat_message = message.content
@@ -260,10 +138,3 @@ async def on_message(message):
 async def remove_message(message, wait_duration):
     await asyncio.sleep(wait_duration)
     await message.delete()
-
-
-def find_audio_file(sound_id):
-    for root, dirs, files in os.walk(os.environ.get('Discord_Bot_Soundfiles'), topdown=True):
-        for file in files:
-            if file.casefold() == sound_id.casefold():
-                return root + "\\"
