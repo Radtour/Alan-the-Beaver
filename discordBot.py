@@ -6,7 +6,6 @@ import random
 from discord.ext import commands
 from mutagen.mp3 import MP3
 
-
 intents = discord.Intents.default()
 intents.voice_states = True
 client = commands.Bot(command_prefix="!", help_command=None, intents=intents)
@@ -30,7 +29,7 @@ ytdl_format_options = {
     'quiet': True,
     'no_warnings': True,
     'default_search': 'auto',
-    'source_address': '0.0.0.0' # bind to ipv4 since ipv6 addresses cause issues sometimes
+    'source_address': '0.0.0.0'  # bind to ipv4 since ipv6 addresses cause issues sometimes
 }
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
@@ -71,7 +70,7 @@ async def play(ctx, *, query):
         query = query + ".mp3"
 
     path = find_audio_file(query)
-    #print(str(path) + str(query))
+    # print(str(path) + str(query))
     if os.path.isfile(path + query):
 
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(path + query))
@@ -82,8 +81,13 @@ async def play(ctx, *, query):
         await ctx.send("Soundfile not found !")
 
 
-@client.command(aliases=['maul', "fresse", "schnauze", "halt"])
+@client.command(aliases=['maul', 'fresse', 'schnauze', 'halt'])
 async def stop(ctx):
+    ctx.voice_client.stop()
+
+
+@client.command(aliases=['raus'])
+async def quit(ctx):
     await ctx.voice_client.disconnect()
 
 
@@ -92,11 +96,6 @@ async def bigmac(ctx, *, member: discord.Member):
     await play(ctx=ctx, query="BIGMAC")
     await asyncio.sleep(1.)
     await member.move_to(None)
-
-
-async def raus(ctx: discord.ext.commands.Context):
-    await asyncio.sleep(1.)
-    await ctx.author.move_to(None)
 
 
 @client.command(aliases=['soundfile', 'soundfiles'])
@@ -134,6 +133,7 @@ async def soundlist(ctx, query=None):
         await ctx.send(f"\n Categories: \n{existing_categories}")
 
 
+
 @client.command()
 async def help(ctx):
     await ctx.send("<:peepoClown:806233172564115467> COMMANDS <:peepoClown:806233172564115467>\n\n" +
@@ -150,22 +150,26 @@ async def help(ctx):
 async def bye(ctx: discord.ext.commands.Context):
     pathfinder = os.listdir(os.environ.get('Discord_Bot_Soundfiles') + "!bye/")
     amount = len(pathfinder)
-    sound_nr = random.randint(0, amount-1)
+    sound_nr = random.randint(0, amount - 1)
     audio = MP3(os.environ.get('Discord_Bot_Soundfiles') + "!bye/" + pathfinder[sound_nr])
     length = audio.info.length
-    #await ctx.send(length)
+    # await ctx.send(length)
     await play(ctx=ctx, query=pathfinder[sound_nr])
-    await asyncio.sleep(length-1.5)
+    await asyncio.sleep(length - 1.5)
     await raus(ctx=ctx)
 
+
+async def raus(ctx: discord.ext.commands.Context):
+    await asyncio.sleep(1.)
+    await ctx.author.move_to(None)
 
 
 @client.event
 async def on_voice_state_update(member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
-   # print("test")
+    # print("test")
     if before.channel is None and after.channel is not None:
-        onlyFans = discord.utils.get(member.guild.roles, name="OnlyFans")
-        if onlyFans in member.roles:
+        only_fans = discord.utils.get(member.guild.roles, name="OnlyFans")
+        if only_fans in member.roles:
             try:
                 if not (client in member.voice.channel.members):
                     await member.voice.channel.connect()
@@ -178,8 +182,8 @@ async def on_voice_state_update(member: discord.Member, before: discord.VoiceSta
             await asyncio.sleep(0.3)
             channel.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
 
-        onlyFans = discord.utils.get(member.guild.roles, name="Erzfeind")
-        if onlyFans in member.roles:
+        only_fans = discord.utils.get(member.guild.roles, name="Erzfeind")
+        if only_fans in member.roles:
             try:
                 if not (client in member.voice.channel.members):
                     await member.voice.channel.connect()
@@ -227,7 +231,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
 @client.event
 async def on_message(message):
-    chatMessage = message.content
+    chat_message = message.content
 
     print(message.author)
     print(message.content)
@@ -236,7 +240,7 @@ async def on_message(message):
 
         is_in_message = False
         for whitelist_label in temporary_whitelist_labels:
-            if chatMessage.__contains__(whitelist_label):
+            if chat_message.__contains__(whitelist_label):
                 is_in_message = True
         if not is_in_message:
             await remove_message(message, 1.5)
@@ -244,13 +248,13 @@ async def on_message(message):
             await remove_message(message, 30)
         return
 
-    if chatMessage.__contains__(":peepoClown:"):
+    if chat_message.__contains__(":peepoClown:"):
         await message.channel.send("<:peepoClown:806233172564115467>")
 
     await client.process_commands(message)
 
     if message.content.startswith('!'):
-        await remove_message(message,  0.5)
+        await remove_message(message, 0.5)
 
 
 async def remove_message(message, wait_duration):
@@ -263,4 +267,3 @@ def find_audio_file(sound_id):
         for file in files:
             if file.casefold() == sound_id.casefold():
                 return root + "\\"
-
