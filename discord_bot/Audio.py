@@ -47,6 +47,32 @@ class Audio(commands.Cog):
         else:
             await ctx.send("Soundfile not found !")
 
+    @commands.command(aliases=['soundfile', 'soundfiles'])
+    async def soundlist(self, ctx, query=None):
+        sound_list = "<:peepoClown:806233172564115467> SOUND-FILES <:peepoClown:806233172564115467>\n\n"
+
+        if query is not None:
+
+            if query.__contains__("meme"):
+                query = "meme"
+            elif query.__contains__("saufi"):
+                query = "saufi"
+            elif query.__contains__("sounds"):
+                query = "sounds"
+            else:
+                existing_categories = search_categories()
+                await ctx.send("Error: category not found.\n\nExisting categories:\n" + existing_categories)
+                return
+
+            pathfinder = os.listdir(os.environ.get('Discord_Bot_Soundfiles') + query)
+            for i in range(len(pathfinder)):
+                location = pathfinder[i].find(".mp3")
+                sound_list += pathfinder[i][:location] + "\n"
+            await ctx.send(sound_list)
+        else:
+            existing_categories = search_categories()
+            await ctx.send(f"\n Categories: \n{existing_categories}")
+
     @commands.command()
     async def bye(self, ctx: discord.ext.commands.Context):
         pathfinder = os.listdir(os.environ.get('Discord_Bot_Soundfiles') + "!bye/")
@@ -76,3 +102,13 @@ def find_audio_file(sound_id):
         for file in files:
             if file.casefold() == sound_id.casefold():
                 return root + "\\"
+
+
+def search_categories():
+    existing_categories = ""
+    pathfinder = os.listdir(os.environ.get('Discord_Bot_Soundfiles'))
+    for i in range(len(pathfinder)):
+        if not pathfinder[i].__contains__(".mp3") and not pathfinder[i] == "!bye":
+            existing_categories += pathfinder[i] + "\n"
+
+    return existing_categories

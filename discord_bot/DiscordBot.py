@@ -1,8 +1,6 @@
 import asyncio
 import discord
-import os
 from discord.ext import commands
-
 from discord_bot.Audio import find_audio_file, Audio
 from discord_bot.YoutubeAudio import YoutubeAudio
 
@@ -27,41 +25,6 @@ async def on_ready():
 @client.command()
 async def test(ctx):
     await ctx.send('Test')
-
-
-@client.command(aliases=['soundfile', 'soundfiles'])
-async def soundlist(ctx, query=None):
-    list = "<:peepoClown:806233172564115467> SOUND-FILES <:peepoClown:806233172564115467>\n\n"
-
-    if query is not None:
-
-        if query.__contains__("meme"):
-            query = "meme"
-        elif query.__contains__("saufi"):
-            query = "saufi"
-        elif query.__contains__("sounds"):
-            query = "sounds"
-        else:
-            existing_categories = ""
-            pathfinder = os.listdir(os.environ.get('Discord_Bot_Soundfiles'))
-            for i in range(len(pathfinder)):
-                if not pathfinder[i].__contains__(".mp3") and not pathfinder[i] == "!bye":
-                    existing_categories += pathfinder[i] + "\n"
-            await ctx.send("Error: category not found.\n\nExisting categories:\n" + existing_categories)
-            return
-
-        pathfinder = os.listdir(os.environ.get('Discord_Bot_Soundfiles') + query)
-        for i in range(len(pathfinder)):
-            location = pathfinder[i].find(".mp3")
-            list += pathfinder[i][:location] + "\n"
-        await ctx.send(list)
-    else:
-        existing_categories = ""
-        pathfinder = os.listdir(os.environ.get('Discord_Bot_Soundfiles'))
-        for i in range(len(pathfinder)):
-            if not pathfinder[i].__contains__(".mp3") and not pathfinder[i] == "!bye":
-                existing_categories += pathfinder[i] + "\n"
-        await ctx.send(f"\n Categories: \n{existing_categories}")
 
 
 @client.command()
