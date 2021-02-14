@@ -1,6 +1,6 @@
 # This is a sample Python script.
 import os
-from discord_bot.discord_bot import client
+from discord_bot.DiscordBot import client
 
 client.run(os.environ.get('DISCORD_BOT'))
 

@@ -3,15 +3,17 @@ import discord
 import os
 from discord.ext import commands
 
-from discord_bot.Audio import find_audio_file
+from discord_bot.Audio import find_audio_file, Audio
+from discord_bot.YoutubeAudio import YoutubeAudio
 
 intents = discord.Intents.default()
 intents.voice_states = True
 client = commands.Bot(command_prefix="!", help_command=None, intents=intents)
-
+client.add_cog(Audio(client))
+client.add_cog(YoutubeAudio(client))
 emoji_list = ["<:peepoClown:806233172564115467>"]
 
-temporary_whitelist_labels = emoji_list + ["Existing categories", "Categories"]
+temporary_whitelist_labels = emoji_list + ["Existing categories", "Categories", "YouTube-Video:"]
 
 
 @client.event

@@ -3,6 +3,9 @@ import asyncio
 import discord
 
 import youtube_dl
+from discord.ext import commands
+
+from discord_bot.Audio import Audio
 
 ffmpeg_options = {
     'options': '-vn'
@@ -45,3 +48,19 @@ class YoutubePlayer(discord.PCMVolumeTransformer):
 
         filename = data['url'] if stream else ytdl.prepare_filename(data)
         return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
+
+
+class YoutubeAudio(commands.Cog):
+    def __init__(self, client):
+        self.client = client
+
+    @commands.command()
+    async def yt(self, ctx, *, url):
+        audio_cog = self.client.get_cog('Audio')
+
+        await Audio.join(audio_cog, ctx=ctx)
+        async with ctx.typing():
+            await Audio.join(audio_cog, ctx=ctx)
+            player = await YoutubePlayer.from_url(url, loop=self.client.loop, stream=True)
+            ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
+        await ctx.send('YouTube-Video: {}'.format(player.title))
