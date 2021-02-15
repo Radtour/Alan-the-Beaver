@@ -31,7 +31,8 @@ class Audio(commands.Cog):
 
     @commands.command()
     async def play(self, ctx, *, query):
-        await self.join(ctx=ctx, channel=None)
+
+        await ctx.invoke(self.client.get_command('join'))
 
         if not query.__contains__(".mp3"):
             query = query + ".mp3"

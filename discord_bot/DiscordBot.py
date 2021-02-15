@@ -11,7 +11,10 @@ client.add_cog(Audio(client))
 client.add_cog(YoutubeAudio(client))
 emoji_list = ["<:peepoClown:806233172564115467>"]
 
-temporary_whitelist_labels = emoji_list + ["Existing categories", "Categories", "YouTube-Video:"]
+temporary_whitelist_labels = emoji_list + ["Existing categories",
+                                           "Categories",
+                                           "YouTube-Video:",
+                                           "Already playing a YouTube-Video"]
 
 
 @client.event
