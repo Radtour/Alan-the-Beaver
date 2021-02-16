@@ -24,6 +24,8 @@ class Audio(commands.Cog):
     @commands.command(aliases=['maul', 'fresse', 'schnauze', 'halt'])
     async def stop(self, ctx):
         ctx.voice_client.stop()
+        audio_cog = self.client.get_cog('YoutubeAudio')
+        audio_cog.is_playing_video = False
 
     @commands.command(aliases=['raus'])
     async def quit(self, ctx):

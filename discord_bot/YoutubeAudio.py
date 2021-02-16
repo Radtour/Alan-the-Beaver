@@ -29,7 +29,7 @@ ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
 
 class YoutubePlayer(discord.PCMVolumeTransformer):
-    def __init__(self, source, *, data, volume=0.5):
+    def __init__(self, source, *, data, volume=0.2):
         super().__init__(source, volume)
 
         self.data = data
