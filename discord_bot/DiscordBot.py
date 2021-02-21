@@ -16,7 +16,9 @@ temporary_whitelist_labels = emoji_list + ["Existing categories",
                                            "Categories",
                                            "YouTube-Video",
                                            "Already playing a YouTube-Video",
-                                           "Error"]
+                                           "Error",
+                                           "Help"
+                                           ]
 
 
 @client.event
@@ -76,7 +78,6 @@ async def on_voice_state_update(member: discord.Member, before: discord.VoiceSta
             await asyncio.sleep(0.3)
             channel.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
 
-
 @client.event
 async def on_message(message):
     chat_message = message.content
@@ -103,10 +104,9 @@ async def on_message(message):
 
     if message.content.startswith('!'):
         await remove_message(message, 0.5)
-    if message.content.startswith('$'):
-        player_list = Roulette()
-        await player_list.test2(message)
-
+    if message.content.startswith('$') or message.content.startswith('%'):
+        await Roulette.get_func(message)
+        await remove_message(message, 0.5)
 
 
 async def remove_message(message, wait_duration):
