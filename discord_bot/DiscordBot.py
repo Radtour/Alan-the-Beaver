@@ -1,9 +1,9 @@
 import asyncio
 import discord
-import russian_roulette
 from discord.ext import commands
 from discord_bot.Audio import find_audio_file, Audio
 from discord_bot.YoutubeAudio import YoutubeAudio
+from discord_bot.Russian_roulette import Roulette
 
 intents = discord.Intents.default()
 intents.voice_states = True
@@ -103,6 +103,10 @@ async def on_message(message):
 
     if message.content.startswith('!'):
         await remove_message(message, 0.5)
+    if message.content.startswith('$'):
+        player_list = Roulette()
+        await player_list.test2(message)
+
 
 
 async def remove_message(message, wait_duration):
