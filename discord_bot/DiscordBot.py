@@ -13,8 +13,9 @@ emoji_list = ["<:peepoClown:806233172564115467>"]
 
 temporary_whitelist_labels = emoji_list + ["Existing categories",
                                            "Categories",
-                                           "YouTube-Video:",
-                                           "Already playing a YouTube-Video"]
+                                           "YouTube-Video",
+                                           "Already playing a YouTube-Video",
+                                           "Error"]
 
 
 @client.event

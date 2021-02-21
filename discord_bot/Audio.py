@@ -5,6 +5,8 @@ import discord
 from discord.ext import commands
 from mutagen.mp3 import MP3
 
+from discord_bot.YoutubePlayer import YoutubePlayer
+
 
 class Audio(commands.Cog):
     def __init__(self, client):
@@ -94,6 +96,18 @@ class Audio(commands.Cog):
         await asyncio.sleep(1.)
         await member.move_to(None)
 
+    @commands.command()
+    async def download(self, ctx, url, name):
+
+        if find_audio_file(name + ".mp3") is None:
+            player = await YoutubePlayer.from_url(url, loop=self.client.loop)
+            src_path = os.path.realpath('.') + '\\' + 'download.mp3'
+            dest_path = os.environ.get('Discord_Bot_Soundfiles') + "download\\" + name + '.mp3'
+            os.rename(src_path, dest_path)
+            await ctx.send('Download: {}'.format(player.title))
+        else:
+            await ctx.send(f'Error: Sound "{name}" already existing')
+
 
 async def raus(ctx: discord.ext.commands.Context):
     await asyncio.sleep(1.)
@@ -105,6 +119,8 @@ def find_audio_file(sound_id):
         for file in files:
             if file.casefold() == sound_id.casefold():
                 return root + "\\"
+
+    return None
 
 
 def search_categories():
