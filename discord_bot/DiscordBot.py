@@ -1,5 +1,6 @@
 import asyncio
 import discord
+import russian_roulette
 from discord.ext import commands
 from discord_bot.Audio import find_audio_file, Audio
 from discord_bot.YoutubeAudio import YoutubeAudio
