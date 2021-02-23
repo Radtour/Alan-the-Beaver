@@ -7,7 +7,7 @@ from discord_bot.Russian_roulette import Roulette
 
 intents = discord.Intents.default()
 intents.voice_states = True
-client = commands.Bot(command_prefix="!", help_command=None, intents=intents)
+client = commands.Bot(command_prefix=['!', '§'], help_command=None, intents=intents, case_insensitive=True)
 client.add_cog(Audio(client))
 client.add_cog(YoutubeAudio(client))
 emoji_list = ["<:peepoClown:806233172564115467>"]
@@ -50,8 +50,8 @@ async def help(ctx):
 async def on_voice_state_update(member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
     # print("test")
     if before.channel is None and after.channel is not None:
-        only_fans = discord.utils.get(member.guild.roles, name="OnlyFans")
-        if only_fans in member.roles:
+        role = discord.utils.get(member.guild.roles, name="OnlyFans")
+        if role in member.roles:
             try:
                 if not (client in member.voice.channel.members):
                     await member.voice.channel.connect()
@@ -64,8 +64,8 @@ async def on_voice_state_update(member: discord.Member, before: discord.VoiceSta
             await asyncio.sleep(0.3)
             channel.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
 
-        only_fans = discord.utils.get(member.guild.roles, name="Erzfeind")
-        if only_fans in member.roles:
+        role = discord.utils.get(member.guild.roles, name="Erzfeind")
+        if role in member.roles:
             try:
                 if not (client in member.voice.channel.members):
                     await member.voice.channel.connect()
@@ -75,6 +75,20 @@ async def on_voice_state_update(member: discord.Member, before: discord.VoiceSta
             channel = discord.utils.get(client.voice_clients, channel=after.channel)
             path = find_audio_file("ERZFEIND.mp3")
             source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(path + "ERZFEIND.mp3"))
+            await asyncio.sleep(0.3)
+            channel.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
+
+        role = discord.utils.get(member.guild.roles, name="Lukas")
+        if role in member.roles:
+            try:
+                if not (client in member.voice.channel.members):
+                    await member.voice.channel.connect()
+            except:
+                pass
+
+            channel = discord.utils.get(client.voice_clients, channel=after.channel)
+            path = find_audio_file("SPEICHER.mp3")
+            source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(path + "SPEICHER.mp3"))
             await asyncio.sleep(0.3)
             channel.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
 

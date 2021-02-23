@@ -90,7 +90,7 @@ class Audio(commands.Cog):
         await asyncio.sleep(length - 1.5)
         await raus(ctx=ctx)
 
-    @commands.command(aliases=['BIGMAC'])
+    @commands.command()
     async def bigmac(self, ctx, *, member: discord.Member):
         await self.play(ctx=ctx, query="BIGMAC")
         await asyncio.sleep(1.)
